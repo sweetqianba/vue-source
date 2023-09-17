@@ -74,6 +74,7 @@ export function initExtend(Vue: GlobalAPI) {
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor
+    // 通过唯一id cid，将配置缓存，不需要每次都构造一边子组件
     cachedCtors[SuperId] = Sub
     return Sub
   }

@@ -18,6 +18,7 @@ import type { Component } from 'types/component'
 import { setCurrentInstance } from 'v3/currentInstance'
 import { syncSetupSlots } from 'v3/apiSetup'
 
+// 面试：vue针对模板渲染做了哪些优化？ => 流程？
 export function initRender(vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
@@ -99,11 +100,12 @@ export function renderMixin(Vue: typeof Component) {
   Vue.prototype.$nextTick = function (fn: (...args: any[]) => any) {
     return nextTick(fn, this)
   }
-
+  // 声明render函数，并返回vnode
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
+    // render函数哪里来的，是用户自己配置的，另外就是解析模板生成的
     const { render, _parentVnode } = vm.$options
-
+    console.log(vm,_parentVnode,'_parentVnode')
     if (_parentVnode && vm._isMounted) {
       vm.$scopedSlots = normalizeScopedSlots(
         vm.$parent!,
@@ -127,6 +129,7 @@ export function renderMixin(Vue: typeof Component) {
       // when parent component is patched.
       setCurrentInstance(vm)
       currentRenderingInstance = vm
+      // 这里有没有可能没有render函数，看用户如何配置的
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e: any) {
       handleError(e, vm, `render`)
@@ -145,6 +148,7 @@ export function renderMixin(Vue: typeof Component) {
           vnode = vm._vnode
         }
       } else {
+        // vm._vnode哪里来的
         vnode = vm._vnode
       }
     } finally {

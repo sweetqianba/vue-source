@@ -25,11 +25,11 @@ const ALWAYS_NORMALIZE = 2
 // wrapper function for providing a more flexible interface
 // without getting yelled at by flow
 export function createElement(
-  context: Component,
-  tag: any,
+  context: Component, // vue实例
+  tag: any, // 标签，可以是一个字符串，也可以是component
   data: any,
   children: any,
-  normalizationType: any,
+  normalizationType: any, // 表示子阶段规范的类型，区分render是手写的还是编译生成的
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
   if (isArray(data) || isPrimitive(data)) {
@@ -43,6 +43,7 @@ export function createElement(
   return _createElement(context, tag, data, children, normalizationType)
 }
 
+// 虚拟节点的创建
 export function _createElement(
   context: Component,
   tag?: string | Component | Function | Object,
@@ -50,6 +51,7 @@ export function _createElement(
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  console.log('pppppppppppppppp',children)
   if (isDef(data) && isDef((data as any).__ob__)) {
     __DEV__ &&
       warn(
@@ -82,16 +84,21 @@ export function _createElement(
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
-  if (normalizationType === ALWAYS_NORMALIZE) {
+  // 将children规范成vnode类型
+  if (normalizationType === ALWAYS_NORMALIZE) { // render是用户手写的
     children = normalizeChildren(children)
-  } else if (normalizationType === SIMPLE_NORMALIZE) {
+  } else if (normalizationType === SIMPLE_NORMALIZE) { // render是编译生成的
     children = simpleNormalizeChildren(children)
   }
+  console.log('oooooooooooooooooooooooooooooooooooooo',children)
+  // 生成本级vnode
   let vnode, ns
+  // tag <div> <myComponent> <component is="xxx"> <node>  =>vode
+  // 如果tag是普通的html标签，则会实例一个普通的VNode
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
-    if (config.isReservedTag(tag)) {
+    if (config.isReservedTag(tag)) { // 如果是内置html元素或者svg元素，则直接声明vnode
       // platform built-in elements
       if (
         __DEV__ &&
@@ -116,7 +123,7 @@ export function _createElement(
       (!data || !data.pre) &&
       isDef((Ctor = resolveAsset(context.$options, 'components', tag)))
     ) {
-      // component
+      // 全局定义的component和部分局部定义component走这里
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
@@ -125,9 +132,12 @@ export function _createElement(
       vnode = new VNode(tag, data, children, undefined, undefined, context)
     }
   } else {
+    // 如果tag不是普通html标签，则通过createComponent初始化一个组件VNode
     // direct component options / constructor
+    // node => vode   { node } 
     vnode = createComponent(tag as any, data, context, children)
   }
+  console.log('11111111111111111111111', children)
   if (isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {

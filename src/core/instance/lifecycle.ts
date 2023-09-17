@@ -20,7 +20,7 @@ import {
 import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
 import { syncSetupProxy } from 'v3/apiSetup'
 
-export let activeInstance: any = null
+export let activeInstance: any = null // 保持当前上下文的Vue实例
 export let isUpdatingChildComponent: boolean = false
 
 export function setActiveInstance(vm: Component) {
@@ -69,9 +69,10 @@ export function lifecycleMixin(Vue: typeof Component) {
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
+      // __patch__方法在web/runtime/index.js中定义
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // updates 组件更新的时候继续调用此方法更新vnode
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
@@ -173,7 +174,7 @@ export function mountComponent(
       }
     }
   }
-  callHook(vm, 'beforeMount')
+  callHook(vm, 'beforeMount') // 在开始渲染前，进行hook调用
 
   let updateComponent
   /* istanbul ignore if */
@@ -185,6 +186,7 @@ export function mountComponent(
       const endTag = `vue-perf-end:${id}`
 
       mark(startTag)
+      // _render在初始化renderMixin的时候声明的
       const vnode = vm._render()
       mark(endTag)
       measure(`vue ${name} render`, startTag, endTag)
@@ -196,6 +198,7 @@ export function mountComponent(
     }
   } else {
     updateComponent = () => {
+      // 生成vnode，并使用vnode更新dom
       vm._update(vm._render(), hydrating)
     }
   }
@@ -216,7 +219,7 @@ export function mountComponent(
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
-  new Watcher(
+  new Watcher( // 将updateComponent函数和watcher绑定, 这样每个组件初始化watcher，也就完成了依赖收集
     vm,
     updateComponent,
     noop,
@@ -235,7 +238,7 @@ export function mountComponent(
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
-  if (vm.$vnode == null) {
+  if (vm.$vnode == null) { // 不是一次组件初始化过程，是new Vue初始化过程，执行此mounted钩子
     vm._isMounted = true
     callHook(vm, 'mounted')
   }
@@ -389,7 +392,7 @@ export function deactivateChildComponent(vm: Component, direct?: boolean) {
     callHook(vm, 'deactivated')
   }
 }
-
+// 执行hook方法
 export function callHook(
   vm: Component,
   hook: string,

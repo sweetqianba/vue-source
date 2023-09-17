@@ -25,6 +25,7 @@ Vue.prototype.$mount = function (
   el = el && query(el)
 
   /* istanbul ignore if */
+  // 不能挂载在body或html上
   if (el === document.body || el === document.documentElement) {
     __DEV__ &&
       warn(

@@ -28,10 +28,11 @@ export interface DepTarget extends DebuggerOptions {
  * directives subscribing to it.
  * @internal
  */
+// 依赖收集核心，实际就是对watcher的一种管理
 export default class Dep {
-  static target?: DepTarget | null
+  static target?: DepTarget | null // 存的就是watcher
   id: number
-  subs: Array<DepTarget | null>
+  subs: Array<DepTarget | null> // 同样是watcher
   // pending subs cleanup
   _pending = false
 
@@ -58,7 +59,7 @@ export default class Dep {
 
   depend(info?: DebuggerEventExtraInfo) {
     if (Dep.target) {
-      Dep.target.addDep(this)
+      Dep.target.addDep(this) // 最终会执行watcher.addDep
       if (__DEV__ && info && Dep.target.onTrack) {
         Dep.target.onTrack({
           effect: Dep.target,

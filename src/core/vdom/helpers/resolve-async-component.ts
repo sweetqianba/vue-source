@@ -35,6 +35,33 @@ export function createAsyncPlaceholder(
   return node
 }
 
+/**
+ * 一共处理三种动态组件配置
+ * 1、模拟promise的resolve和reject
+ * Vue.component('async-example', function (resolve, reject) {
+    require(['./my-async-component'], resolve)
+  })
+ * 2、Promise创建组件
+  Vue.component(
+    'async-webpack-example',
+    // 该 `import` 函数返回一个 `Promise` 对象。
+    () => import('./my-async-component')
+  )
+ * 3、高级配置项产生的异步组件
+  const AsyncComp = () => ({
+    // 需要加载的组件。应当是一个 Promise
+    component: import('./MyComp.vue'),
+    // 加载中应当渲染的组件
+    loading: LoadingComp,
+    // 出错时渲染的组件
+    error: ErrorComp,
+    // 渲染加载中组件前的等待时间。默认：200ms。
+    delay: 200,
+    // 最长等待时间。超出此时间则渲染错误组件。默认：Infinity
+    timeout: 3000
+  })
+  Vue.component('async-example', AsyncComp)
+ */
 export function resolveAsyncComponent(
   factory: { (...args: any[]): any; [keye: string]: any },
   baseCtor: typeof Component
@@ -83,7 +110,7 @@ export function resolveAsyncComponent(
       }
     }
 
-    const resolve = once((res: Object | Component) => {
+    const resolve = once((res: Object | Component) => { // 回调的方式实现异步
       // cache resolved
       factory.resolved = ensureCtor(res, baseCtor)
       // invoke callbacks only if this is not a synchronous resolve
@@ -107,15 +134,15 @@ export function resolveAsyncComponent(
       }
     })
 
-    const res = factory(resolve, reject)
+    const res = factory(resolve, reject) // 2、3种方式都是有返回值的
 
     if (isObject(res)) {
-      if (isPromise(res)) {
+      if (isPromise(res)) { // 2返回的是promise
         // () => Promise
         if (isUndef(factory.resolved)) {
           res.then(resolve, reject)
         }
-      } else if (isPromise(res.component)) {
+      } else if (isPromise(res.component)) { // 3返回的component是promise
         res.component.then(resolve, reject)
 
         if (isDef(res.error)) {

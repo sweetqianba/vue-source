@@ -6,6 +6,7 @@ export function initAssetRegisters(Vue: GlobalAPI) {
   /**
    * Create asset registration methods.
    */
+  // 全局组件、指令、filter作为默认数据内置到每一个vue实例中
   ASSET_TYPES.forEach(type => {
     // @ts-expect-error function is not exact same type
     Vue[type] = function (

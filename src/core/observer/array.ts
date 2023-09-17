@@ -9,7 +9,7 @@ import { def } from '../util/index'
 const arrayProto = Array.prototype
 export const arrayMethods = Object.create(arrayProto)
 
-const methodsToPatch = [
+const methodsToPatch = [ // 定死的内容，如果后面ecmascript对数组方法进行了扩展，还需要手动支持
   'push',
   'pop',
   'shift',

@@ -39,6 +39,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+// 通过此方法，将props、data上的key代理到vm上，也就是this上
 export function proxy(target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter() {
     return this[sourceKey][key]
@@ -107,7 +108,7 @@ function initProps(vm: Component, propsOptions: Object) {
         }
       })
     } else {
-      defineReactive(props, key, value)
+      defineReactive(props, key, value) // 定义，可以通过props或vm._props访问到key
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
@@ -116,6 +117,8 @@ function initProps(vm: Component, propsOptions: Object) {
       proxy(vm, `_props`, key)
     }
   }
+  console.log(propsOptions,'propsOptions',vm._props,vm)
+
   toggleObserving(true)
 }
 
@@ -155,7 +158,7 @@ function initData(vm: Component) {
     }
   }
   // observe data
-  const ob = observe(data)
+  const ob = observe(data) // 对整个data做响应式
   ob && ob.vmCount++
 }
 
@@ -172,7 +175,7 @@ export function getData(data: Function, vm: Component): any {
   }
 }
 
-const computedWatcherOptions = { lazy: true }
+const computedWatcherOptions = { lazy: true } // computed特有属性
 
 function initComputed(vm: Component, computed: Object) {
   // $flow-disable-line
@@ -373,7 +376,7 @@ export function stateMixin(Vue: typeof Component) {
     }
     options = options || {}
     options.user = true
-    const watcher = new Watcher(vm, expOrFn, cb, options)
+    const watcher = new Watcher(vm, expOrFn, cb, options) // 是一个user watcher
     if (options.immediate) {
       const info = `callback for immediate watcher "${watcher.expression}"`
       pushTarget()

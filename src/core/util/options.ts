@@ -25,6 +25,7 @@ import type { ComponentOptions } from 'types/options'
  * value into the final value.
  */
 const strats = config.optionMergeStrategies
+console.log(strats,'pppp')
 
 /**
  * Options with restrictions
@@ -151,6 +152,7 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
+// hook合并成arrays
 export function mergeLifecycleHook(
   parentVal: Array<Function> | null,
   childVal: Function | Array<Function> | null
@@ -159,8 +161,8 @@ export function mergeLifecycleHook(
     ? parentVal
       ? parentVal.concat(childVal)
       : isArray(childVal)
-      ? childVal
-      : [childVal]
+        ? childVal
+        : [childVal]
     : parentVal
   return res ? dedupeHooks(res) : res
 }
@@ -176,7 +178,7 @@ function dedupeHooks(hooks: any) {
 }
 
 LIFECYCLE_HOOKS.forEach(hook => {
-  strats[hook] = mergeLifecycleHook
+  strats[hook] = mergeLifecycleHook // hook 的merge方法有特殊处理
 })
 
 /**
@@ -432,11 +434,11 @@ export function mergeOptions(
   // Only merged options has the _base property.
   if (!child._base) {
     if (child.extends) {
-      parent = mergeOptions(parent, child.extends, vm)
+      parent = mergeOptions(parent, child.extends, vm) // 合并extends内容
     }
     if (child.mixins) {
       for (let i = 0, l = child.mixins.length; i < l; i++) {
-        parent = mergeOptions(parent, child.mixins[i], vm)
+        parent = mergeOptions(parent, child.mixins[i], vm) // 合并mixins内容
       }
     }
   }
@@ -475,12 +477,14 @@ export function resolveAsset(
   }
   const assets = options[type]
   // check local registration variations first
+  // hasOwn只能获取到options中components定义的组件，全局组件获取不到，因为是在原型链上的
   if (hasOwn(assets, id)) return assets[id]
-  const camelizedId = camelize(id)
+  const camelizedId = camelize(id) // 转换成小驼峰获取
   if (hasOwn(assets, camelizedId)) return assets[camelizedId]
-  const PascalCaseId = capitalize(camelizedId)
+  const PascalCaseId = capitalize(camelizedId) // 转换成大驼峰获取
   if (hasOwn(assets, PascalCaseId)) return assets[PascalCaseId]
   // fallback to prototype chain
+  // 最后去原型链上去获取数据
   const res = assets[id] || assets[camelizedId] || assets[PascalCaseId]
   if (__DEV__ && warnMissing && !res) {
     warn('Failed to resolve ' + type.slice(0, -1) + ': ' + id)

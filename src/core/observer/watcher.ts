@@ -86,10 +86,10 @@ export default class Watcher implements DepTarget {
     }
     // options
     if (options) {
-      this.deep = !!options.deep
-      this.user = !!options.user
-      this.lazy = !!options.lazy
-      this.sync = !!options.sync
+      this.deep = !!options.deep // watch的deep模式
+      this.user = !!options.user // watch就是一个user的watcher
+      this.lazy = !!options.lazy // computed是lazy模式的watcher
+      this.sync = !!options.sync // 更新数据是否是同步的
       this.before = options.before
       if (__DEV__) {
         this.onTrack = options.onTrack
@@ -110,7 +110,7 @@ export default class Watcher implements DepTarget {
     this.expression = __DEV__ ? expOrFn.toString() : ''
     // parse expression for getter
     if (isFunction(expOrFn)) {
-      this.getter = expOrFn
+      this.getter = expOrFn // mountComponent方法，也就是vm._update(vm._render())
     } else {
       this.getter = parsePath(expOrFn)
       if (!this.getter) {
@@ -124,18 +124,18 @@ export default class Watcher implements DepTarget {
           )
       }
     }
-    this.value = this.lazy ? undefined : this.get()
+    this.value = this.lazy ? undefined : this.get() // 
   }
 
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
   get() {
-    pushTarget(this)
+    pushTarget(this) // 将此watcher赋值到Dep.target上
     let value
     const vm = this.vm
     try {
-      value = this.getter.call(vm, vm)
+      value = this.getter.call(vm, vm) // 执行vm._update
     } catch (e: any) {
       if (this.user) {
         handleError(e, vm, `getter for watcher "${this.expression}"`)

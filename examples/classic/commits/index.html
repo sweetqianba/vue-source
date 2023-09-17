@@ -19,7 +19,7 @@
       }
     </style>
     <!-- Delete ".min" for console warnings in development -->
-    <script src="../../../dist/vue.min.js"></script>
+    <script src="../../../dist/vue.js"></script>
   </head>
   <body>
     <div id="demo">
@@ -41,6 +41,8 @@
           at <span class="date">{{ record.commit.author.date | formatDate }}</span>
         </li>
       </ul>
+      <AAA></AAA>
+      <my-component></my-component>
     </div>
     <script src="app.js"></script>
   </body>

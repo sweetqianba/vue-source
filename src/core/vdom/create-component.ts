@@ -46,8 +46,9 @@ const componentVNodeHooks = {
     } else {
       const child = (vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
-        activeInstance
+        activeInstance // 保持父级的vue实例
       ))
+      console.log(vnode,child,'child',activeInstance)
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -98,10 +99,11 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+// 根据component创建VNode
 export function createComponent(
   Ctor: typeof Component | Function | ComponentOptions | void,
   data: VNodeData | undefined,
-  context: Component,
+  context: Component, // 父Vue实例
   children?: Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
@@ -109,11 +111,12 @@ export function createComponent(
     return
   }
 
-  const baseCtor = context.$options._base
-
+  const baseCtor = context.$options._base // => vue构造函数，可通过此调用一些Vue的方法，定义在src/core/global-api/index.js
   // plain options object: turn it into a constructor
-  if (isObject(Ctor)) {
-    Ctor = baseCtor.extend(Ctor as typeof Component)
+  // 根据传入的组件，构造子类构造函数，最后产生的是一个“构造函数”
+  if (isObject(Ctor)) { // 如果是一个对象，则是一个普通的自定义组件，会给分配一个cid，反之，动态组件就没有cid
+    Ctor = baseCtor.extend(Ctor as typeof Component) // 将Ctor和Vue配置合并，产生一个新的Component组件
+    console.log(Ctor,'Ctor22')
   }
 
   // if at this stage it's not a constructor or an async component factory,
@@ -128,7 +131,7 @@ export function createComponent(
   // async component
   let asyncFactory
   // @ts-expect-error
-  if (isUndef(Ctor.cid)) {
+  if (isUndef(Ctor.cid)) { // 表示动态组件
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
     if (Ctor === undefined) {
@@ -188,6 +191,7 @@ export function createComponent(
   }
 
   // install component management hooks onto the placeholder node
+  // 安装组件钩子函数，为data赋值初始的hooks ==> data.hook = {...hooks}
   installComponentHooks(data)
 
   // return a placeholder vnode
@@ -197,18 +201,19 @@ export function createComponent(
     // @ts-expect-error
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data,
-    undefined,
+    undefined, // 初始化组件vnode时，没有children，关键点
     undefined,
     undefined,
     context,
     // @ts-expect-error
-    { Ctor, propsData, listeners, tag, children },
+    { Ctor, propsData, listeners, tag, children }, // 这里会在vnode.componentOptions里加上Ctor
     asyncFactory
   )
 
   return vnode
 }
 
+// 
 export function createComponentInstanceForVnode(
   // we know it's MountedComponentVNode but flow doesn't
   vnode: any,
@@ -216,9 +221,9 @@ export function createComponentInstanceForVnode(
   parent?: any
 ): Component {
   const options: InternalComponentOptions = {
-    _isComponent: true,
-    _parentVnode: vnode,
-    parent
+    _isComponent: true, // 是一个组件
+    _parentVnode: vnode, // 当前vnode
+    parent // 父实例
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
@@ -226,7 +231,7 @@ export function createComponentInstanceForVnode(
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
-  return new vnode.componentOptions.Ctor(options)
+  return new vnode.componentOptions.Ctor(options) // 会执行_init，走isComponent分支
 }
 
 function installComponentHooks(data: VNodeData) {

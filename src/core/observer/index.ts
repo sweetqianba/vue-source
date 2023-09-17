@@ -53,12 +53,12 @@ export class Observer {
     // this.value = value
     this.dep = mock ? mockDep : new Dep()
     this.vmCount = 0
-    def(value, '__ob__', this)
+    def(value, '__ob__', this) // 为_data或者_props添加__ob__属性
     if (isArray(value)) {
       if (!mock) {
         if (hasProto) {
           /* eslint-disable no-proto */
-          ;(value as any).__proto__ = arrayMethods
+          ;(value as any).__proto__ = arrayMethods // 将数组的一些方法重写
           /* eslint-enable no-proto */
         } else {
           for (let i = 0, l = arrayKeys.length; i < l; i++) {
@@ -155,6 +155,7 @@ export function defineReactive(
     enumerable: true,
     configurable: true,
     get: function reactiveGetter() {
+      // 每次访问数据，都会到这里
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
         if (__DEV__) {
@@ -163,7 +164,7 @@ export function defineReactive(
             type: TrackOpTypes.GET,
             key
           })
-        } else {
+        } else { // 然后执行dep.depend
           dep.depend()
         }
         if (childOb) {

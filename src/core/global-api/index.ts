@@ -28,11 +28,14 @@ export function initGlobalAPI(Vue: GlobalAPI) {
       )
     }
   }
+
+  // 响应式的config属性
   Object.defineProperty(Vue, 'config', configDef)
 
   // exposed util methods.
   // NOTE: these are not considered part of the public API - avoid relying on
   // them unless you are aware of the risk.
+  // 完善vue核心工具和生态
   Vue.util = {
     warn,
     extend,
@@ -57,10 +60,11 @@ export function initGlobalAPI(Vue: GlobalAPI) {
 
   // this is used to identify the "base" constructor to extend all plain-object
   // components with in Weex's multi-instance scenarios.
-  Vue.options._base = Vue
+  Vue.options._base = Vue // 用于createComponent方法
 
-  extend(Vue.options.components, builtInComponents)
+  extend(Vue.options.components, builtInComponents) // 补充内置组件 KeepAlive
 
+  // 流程
   initUse(Vue)
   initMixin(Vue)
   initExtend(Vue)

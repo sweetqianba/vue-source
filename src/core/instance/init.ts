@@ -16,6 +16,7 @@ let uid = 0
 export function initMixin(Vue: typeof Component) {
   Vue.prototype._init = function (options?: Record<string, any>) {
     const vm: Component = this
+    console.log(options,'options-----',vm)
     // a uid
     vm._uid = uid++
 
@@ -35,13 +36,14 @@ export function initMixin(Vue: typeof Component) {
     // effect scope
     vm._scope = new EffectScope(true /* detached */)
     vm._scope._vm = true
-    // merge options
-    if (options && options._isComponent) {
+    // merge options  => 内外merge 
+    if (options && options._isComponent) { // 如果是一个组件
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
       initInternalComponent(vm, options as any)
     } else {
+      // 每次初始化vue，会给components默认塞keepalive、transition、transitiongroup组件
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor as any),
         options || {},
@@ -55,13 +57,17 @@ export function initMixin(Vue: typeof Component) {
       vm._renderProxy = vm
     }
     // expose real self
+    // init为何划分层级 => 区分大模块 + 小功能
+    // 面试beforeCreate之前做了啥？
     vm._self = vm
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate', undefined, false /* setContext */)
+    // inject和data\props谁比较前？
     initInjections(vm) // resolve injections before data/props
     initState(vm)
+    // provide在data、props之后
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 
@@ -71,13 +77,13 @@ export function initMixin(Vue: typeof Component) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
+    console.log(vm.$options.el,'vm.$options.el')
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
   }
 }
-
+// 子组件初始化通过此方法初始化options
 export function initInternalComponent(
   vm: Component,
   options: InternalComponentOptions
@@ -94,6 +100,7 @@ export function initInternalComponent(
   opts._renderChildren = vnodeComponentOptions.children
   opts._componentTag = vnodeComponentOptions.tag
 
+  // 将createComponentInstanceForVnode生成的render和staticRenderFns绑到$options上
   if (options.render) {
     opts.render = options.render
     opts.staticRenderFns = options.staticRenderFns

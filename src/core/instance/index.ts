@@ -10,9 +10,12 @@ function Vue(options) {
   if (__DEV__ && !(this instanceof Vue)) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
+  // 真正初始化的地方
+  console.log(this,"真正初始化的地方")
   this._init(options)
 }
 
+// 流程化地初始化实例
 //@ts-expect-error Vue has function type
 initMixin(Vue)
 //@ts-expect-error Vue has function type

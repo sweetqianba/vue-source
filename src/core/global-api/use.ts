@@ -1,6 +1,7 @@
 import type { GlobalAPI } from 'types/global-api'
 import { toArray, isFunction } from '../util/index'
 
+// 初始化vue插件的基座
 export function initUse(Vue: GlobalAPI) {
   Vue.use = function (plugin: Function | any) {
     const installedPlugins =

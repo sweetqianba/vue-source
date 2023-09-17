@@ -7,4 +7,6 @@ import platformModules from 'web/runtime/modules/index'
 // built-in modules have been applied.
 const modules = platformModules.concat(baseModules)
 
+// nodeOps封装了一系列DOM操作的方法
+// modules定义了一些模块的钩子函数实现 create update destory
 export const patch: Function = createPatchFunction({ nodeOps, modules })

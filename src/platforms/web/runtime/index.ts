@@ -1,4 +1,4 @@
-import Vue from 'core/index'
+import Vue from 'core/index' // 调用vue
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
@@ -30,6 +30,7 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// patch方法定义
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
